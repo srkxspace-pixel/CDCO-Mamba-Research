@@ -6,6 +6,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 import numpy as np
 import torch.nn.functional as F
 from .data_argument import data_aug
+from pathlib import Path
 
 def init_dataloader(cfg: DictConfig,
                     final_timeseires: torch.tensor,
@@ -92,7 +93,8 @@ def init_stratified_dataloader(cfg: DictConfig,
         smri_val = smri_val_test[valid_index]
 
     if cfg.dataset.expand:
-        final_timeseires_train, final_pearson_train, labels_train, smri_train = data_aug(final_timeseires_train, final_pearson_train, labels_train, smri_train)
+        cache = cfg.dataset.get("aug_cache") or str(Path(cfg.dataset.path).with_name("train_aug_smri.npy"))  # disk-backed 4x sMRI set
+        final_timeseires_train, final_pearson_train, labels_train, smri_train = data_aug(final_timeseires_train, final_pearson_train, labels_train, smri_train, cache)
     
     
     train_dataset = utils.TensorDataset(

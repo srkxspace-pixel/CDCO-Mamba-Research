@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from .preprocess import StandardScaler
 from omegaconf import DictConfig, open_dict
-import pymetis as metis
+# import pymetis as metis  # unused; pymetis has no Windows build
 import networkx as nx
 
 def load_adni_data(cfg: DictConfig):

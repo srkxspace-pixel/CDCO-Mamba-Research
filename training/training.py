@@ -85,6 +85,7 @@ class Train:
         self.train_accuracy1, _, _, _, _ = calculate_metrics(pred_list, label_list)
         self.train_mse, _, _, _, _ = calculate_metrics(pred_list1, label_list)
 
+    @torch.no_grad()  # upstream built autograd graphs during evaluation; outputs are unchanged
     def test_per_epoch(self, dataloader, loss_meter, str_select):
         labels = []
         result = []

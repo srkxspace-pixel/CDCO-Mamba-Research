@@ -1,0 +1,11 @@
+name: abide
+batch_size: 16
+test_batch_size: 16
+val_batch_size: 16
+train_set: 0.8
+val_set: 0.1
+path: ../../data/abide/abide_284.npy  # built by tools/prepare_abide.py; run from the repo root
+stratified: True
+drop_last: False
+expand: True
+aug_cache: null  # where data_aug writes the 4x training sMRI memmap (~3.2 GB); put it on an SSD

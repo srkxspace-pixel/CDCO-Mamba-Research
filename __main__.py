@@ -39,8 +39,8 @@ def main(cfg: DictConfig):
         acc.append(max_process[0])
         spe.append(max_process[1])
         sen.append(max_process[2])
-        auc.append(max_process[3])
-        f1.append(max_process[4])
+        auc.append(max_process[4])  # train() returns [acc, spe, sen, f1, auc]; upstream swapped these two
+        f1.append(max_process[3])
         run.finish()
     print(f"ACC: {np.mean(acc)*100:.2f}±{np.std(acc, ddof=1)*100:.2f}")
     print(f"SPE: {np.mean(spe)*100:.2f}±{np.std(spe, ddof=1)*100:.2f}")

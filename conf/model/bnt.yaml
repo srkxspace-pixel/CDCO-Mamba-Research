@@ -1,4 +1,4 @@
-name: CDCo-MambaNet
+name: CDCo_MambaNet  # eval()-ed in models/__init__.py; a hyphen is not a valid name
 fuse_channel: 512
 fuse_shape: 48
 ct_loss: 1
@@ -15,3 +15,4 @@ d_state: 8
 d_conv: 3
 expand: 4
 cls_num: 4
+grad_checkpoint: false  # true = checkpoint encoder blocks (exact fp32 grads) so batch 16 fits a 4 GB GPU

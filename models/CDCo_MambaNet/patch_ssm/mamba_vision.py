@@ -2,9 +2,8 @@ import torch
 import torch.nn as nn
 import math
 import torch.nn.functional as F
-from mamba_ssm.ops.selective_scan_interface import selective_scan_fn
+from .selective_scan import selective_scan_fn
 from einops import rearrange, repeat
-from .wtconv import WTConv1d
 
 class MambaVisionMixer_Fuse(nn.Module):
     def __init__(
@@ -70,8 +69,8 @@ class MambaVisionMixer_Fuse(nn.Module):
         self.D._no_weight_decay = True
         self.out_proj = nn.Linear(self.d_inner, self.d_model, bias=bias, **factory_kwargs)
 
-        self.wtconv = WTConv1d(in_channels=self.d_inner,out_channels=self.d_inner, kernel_size=d_conv)
-        # self.wtconv = nn.Conv1d(in_channels=self.d_inner,out_channels=self.d_inner, kernel_size=d_conv, stride=1, padding=1)
+        # WTConv1d (wavelet conv) source is not in the repo; use the authors' commented Conv1d alternative.
+        self.wtconv = nn.Conv1d(in_channels=self.d_inner,out_channels=self.d_inner, kernel_size=d_conv, stride=1, padding=1)
         self.apply(self._init_weights)
 
     def _init_weights(self, m):
@@ -179,8 +178,8 @@ class MambaVisionMixer_Cls(nn.Module):
         self.D._no_weight_decay = True
         self.out_proj = nn.Linear(self.d_inner, self.d_model, bias=bias, **factory_kwargs)
 
-        self.wtconv = WTConv1d(in_channels=self.d_inner,out_channels=self.d_inner, kernel_size=d_conv, stride=1)
-        # self.wtconv = nn.Conv1d(in_channels=self.d_inner,out_channels=self.d_inner, kernel_size=d_conv, stride=1, padding=1)
+        # WTConv1d (wavelet conv) source is not in the repo; use the authors' commented Conv1d alternative.
+        self.wtconv = nn.Conv1d(in_channels=self.d_inner,out_channels=self.d_inner, kernel_size=d_conv, stride=1, padding=1)
         self.apply(self._init_weights)
 
     def _init_weights(self, m):

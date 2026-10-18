@@ -3,9 +3,26 @@ import math
 import torch.nn as nn
 import torch.nn.functional as F
 from timm.models.layers import trunc_normal_, DropPath
+from torch.utils.checkpoint import checkpoint
 from .smri_encoder import generate_model
 from .fmri_encoder import ConvNeXtV2_Mamba
 from ..patch_ssm.mamba_vision import MambaVisionMixer_Fuse, MambaVisionMixer_Cls
+
+def checkpoint_blocks(blocks):
+    """Recompute each block's activations in backward instead of storing them (same fp32 grads).
+
+    Recomputation runs BatchNorm forward twice per step, so running stats would update twice;
+    momentum m' = 1 - sqrt(1 - m) makes the two updates equal one update with the original m.
+    State-dict keys are unchanged. DropPath masks are replayed (checkpoint preserves RNG state).
+    """
+    for blk in blocks:
+        fwd = blk.forward
+        blk.forward = lambda x, fwd=fwd, blk=blk: (
+            checkpoint(fwd, x, use_reentrant=False) if blk.training and torch.is_grad_enabled() else fwd(x))
+        for bn in blk.modules():
+            if isinstance(bn, nn.modules.batchnorm._BatchNorm):
+                bn.momentum = 1 - (1 - bn.momentum) ** 0.5
+
 
 class Mamba_fusion(nn.Module):
     def __init__(self, config, in_features, in_features_ssm): 
@@ -13,12 +30,8 @@ class Mamba_fusion(nn.Module):
         self.in_features = in_features
         self.cls_token_s = nn.Parameter(torch.zeros(1, 1, in_features_ssm))
         self.cls_token_f = nn.Parameter(torch.zeros(1, 1, in_features_ssm))
-        # ABIDE
-        # self.fmri_change = nn.Linear(config.model.abide_fmri_feature_shape, in_features_ssm)
-        # ADNI
-        self.fmri_change = nn.Linear(config.model.adni_fmri_feature_shape, in_features_ssm)
-        # TAOWU
-        # self.fmri_change = nn.Linear(config.model.neurocon_fmri_feature_shape, in_features_ssm)
+        # Upstream switched between these by commenting lines; pick <dataset>_fmri_feature_shape instead.
+        self.fmri_change = nn.Linear(config.model[f"{config.dataset.name}_fmri_feature_shape"], in_features_ssm)
         self.smri_change = nn.Linear(config.model.smri_feature_shape, in_features_ssm)
         self.fmri_encoder = ConvNeXtV2_Mamba(depths=config.model.fmri_encoder_deepth, dims=config.model.fmri_encoder_dims)
         self.smri_encoder = generate_model(50)
@@ -40,8 +53,12 @@ class Mamba_fusion(nn.Module):
         self.predictor = MLPHead(in_features_ssm, in_features_ssm, in_features)
         self.sl1 = ContrastiveLossModel()
         self.cls_linear = nn.Linear(in_features_ssm*2, config.model.cls_num)
-        self.mlp_cls = Mlp_cls(in_features=in_features_ssm,act_layer=nn.GELU,cls_in=in_features)
+        self.mlp_cls = Mlp_cls(in_features=in_features_ssm,act_layer=nn.GELU,cls_num=config.model.cls_num,cls_in=in_features)
         self.apply(self._init_weights)
+        if config.model.get('grad_checkpoint', False):
+            blocks = [b for layer in (self.smri_encoder.layer1, self.smri_encoder.layer2,
+                                      self.smri_encoder.layer3, self.smri_encoder.layer4) for b in layer]
+            checkpoint_blocks(blocks + [b for stage in self.fmri_encoder.stages for b in stage])
 
     def _init_weights(self, m):
         trunc_normal_(self.cls_token_s, std=.02)
