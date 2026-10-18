@@ -5,7 +5,8 @@
 Data: uses an attached dataset containing abide_284.npy (+ abide_smri96.npy) if there is one,
 otherwise rebuilds it from public ABIDE with tools/prepare_abide.py (~40 min of CPU).
 Runs every (seed, variant) pair, one process per GPU at a time, seed by seed so finished results
-stay paired; nothing new starts after LAUNCH_UNTIL_H so the commit ends inside Kaggle's 12 h.
+stay paired; nothing new starts after LAUNCH_UNTIL_H (counted from script start, data rebuild included)
+so the commit ends inside Kaggle's 12 h.
 Writes tables, a paired t-test and a robustness plot to /kaggle/working.
 """
 import glob
@@ -28,7 +29,8 @@ VARIANTS = {
     # 'raf': ['model.reliability_fusion=true'] + CORRUPT, 'dfd': ['model.dynamic_dim=true'] + CORRUPT,
 }
 SEEDS = [0, 1, 2, 3, 4]
-LAUNCH_UNTIL_H, HARD_STOP_H = 9.5, 11.6
+LAUNCH_UNTIL_H, HARD_STOP_H = 9.3, 11.4  # hours since this script started (Kaggle kills the session at 12 h)
+T0 = time.time()
 CODE, OUT = Path(__file__).resolve().parents[1], Path('/kaggle/working')
 M = ['ACC', 'SPE', 'SEN', 'F1', 'AUC']
 ORDER = ['clean', 'fmri_noise_0.5', 'fmri_noise_1.0', 'smri_noise_0.5', 'smri_noise_1.0', 'fmri_missing', 'smri_missing']
@@ -63,11 +65,11 @@ def train(data, gpus):
         lines = [l for l in open(OUT / f'logs/{tag}.log', errors='ignore') if 'Epoch[' in l]
         return lines[-1].split('INFO] ')[-1][:120] if lines else 'preparing data / augmentation'
 
-    start, last_print = time.time(), 0
+    last_print = 0
     queue = [(f'{v}_seed{s}', s, VARIANTS[v]) for s in SEEDS for v in VARIANTS]
     running = {}
     while queue or running:
-        h = (time.time() - start) / 3600
+        h = (time.time() - T0) / 3600
         for g in gpus:
             if g not in running and queue and h < LAUNCH_UNTIL_H:
                 tag, s, ov = queue.pop(0)
