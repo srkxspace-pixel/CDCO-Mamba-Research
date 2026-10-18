@@ -1,5 +1,6 @@
 # Reconstructed from the repo's dataset/__pycache__/abide.cpython-38.pyc
 # (the .py was never committed).
+import ntpath
 import os
 import numpy as np
 import torch
@@ -24,8 +25,9 @@ def load_abide_data(cfg: DictConfig):
     labels = torch.Tensor(labels)
 
     # prepare_abide.py stores sMRI as a path to a .npy; copy-on-write mmap keeps 1 GB+ out of RAM.
-    if isinstance(smri, str):  # filename relative to the dataset file
-        smri = torch.from_numpy(np.load(os.path.join(os.path.dirname(cfg.dataset.path), smri), mmap_mode='c'))
+    if isinstance(smri, str):  # the .npy next to the dataset file (older files stored a Windows path)
+        name = ntpath.basename(smri)  # ntpath splits on both / and \ on any OS
+        smri = torch.from_numpy(np.load(os.path.join(os.path.dirname(cfg.dataset.path), name), mmap_mode='c'))
     else:
         smri = torch.Tensor(smri)
 

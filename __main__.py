@@ -1,4 +1,6 @@
 from datetime import datetime
+import random
+import torch
 import wandb
 import hydra
 from omegaconf import DictConfig, open_dict
@@ -33,7 +35,12 @@ def model_training(cfg: DictConfig):
 def main(cfg: DictConfig):
     group_name = f"{cfg.dataset.name}_{cfg.model.name}_{cfg.datasz.percentage}_{cfg.preprocess.name}"
     acc, spe, sen, f1, auc = [], [], [], [], []
-    for _ in range(cfg.repeat_time):
+    base_seed = cfg.get('seed', 0)
+    for i in range(cfg.repeat_time):
+        seed = base_seed + i  # same split and init for every variant at a given repeat
+        random.seed(seed); np.random.seed(seed); torch.manual_seed(seed)
+        with open_dict(cfg):
+            cfg.seed = seed
         run = wandb.init(reinit=True, tags=[f"{cfg.dataset.name}"])
         max_process = model_training(cfg)
         acc.append(max_process[0])

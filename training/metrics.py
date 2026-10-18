@@ -1,7 +1,6 @@
 import numpy as np
 from sklearn.metrics import confusion_matrix, accuracy_score, f1_score, roc_auc_score
 import torch
-from sklearn.preprocessing import label_binarize
 
 def calculate_metrics(pred, label):
     pred_scores = pred
@@ -21,8 +20,10 @@ def calculate_metrics(pred, label):
     avg_specificity = np.mean(specificity)
     avg_sensitivity = np.mean(sensitivity)
     f1 = f1_score(label, pred, average='macro')
-    classes = list(range(np.shape(pred_scores)[-1]))  # upstream hard-coded [0, 1, 2, 3]
-    label_bin = label_binarize(label, classes=classes)
-    pred_bin = label_binarize(pred, classes=classes)
-    auc = roc_auc_score(label_bin, pred_bin, average='macro', multi_class='ovo')
+    # AUC from predicted probabilities (upstream binarised the argmax, i.e. AUC of hard labels)
+    probs = torch.softmax(torch.tensor(np.asarray(pred_scores, dtype=np.float64)), -1).numpy()
+    if probs.shape[1] == 2:
+        auc = roc_auc_score(label, probs[:, 1])
+    else:
+        auc = roc_auc_score(label, probs, average='macro', multi_class='ovr', labels=list(range(probs.shape[1])))
     return accuracy, avg_specificity, avg_sensitivity, f1, auc

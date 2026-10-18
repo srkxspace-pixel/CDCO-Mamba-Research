@@ -1,2 +1,7 @@
 name: Train
 epochs: 100
+# Noisy / missing-modality training (per sample; a missing modality becomes N(0,1) noise and is flagged)
+corrupt_p_missing: 0.0     # probability each of sMRI / fMRI is dropped (never both)
+corrupt_p_noise: 0.0       # probability per modality of N(0, s^2) noise, s ~ U(0, corrupt_max_sigma)
+corrupt_max_sigma: 1.0     # inputs are z-scored, so this is in units of signal std
+robustness_eval: true      # after training: test metrics under noise / missing modality

@@ -7,6 +7,7 @@ from torch.utils.checkpoint import checkpoint
 from .smri_encoder import generate_model
 from .fmri_encoder import ConvNeXtV2_Mamba
 from ..patch_ssm.mamba_vision import MambaVisionMixer_Fuse, MambaVisionMixer_Cls
+from .reliability import ReliabilityGate
 
 def checkpoint_blocks(blocks):
     """Recompute each block's activations in backward instead of storing them (same fp32 grads).
@@ -54,6 +55,10 @@ class Mamba_fusion(nn.Module):
         self.sl1 = ContrastiveLossModel()
         self.cls_linear = nn.Linear(in_features_ssm*2, config.model.cls_num)
         self.mlp_cls = Mlp_cls(in_features=in_features_ssm,act_layer=nn.GELU,cls_num=config.model.cls_num,cls_in=in_features)
+        raf, dfd = config.model.get('reliability_fusion', False), config.model.get('dynamic_dim', False)
+        self.gate = ReliabilityGate(in_features_ssm, config.model.cls_num, raf=raf, dfd=dfd,
+                                    min_dim=config.model.get('min_dim', 12),
+                                    nested_dropout=config.model.get('nested_dropout', 0.3)) if raf or dfd else None
         self.apply(self._init_weights)
         if config.model.get('grad_checkpoint', False):
             blocks = [b for layer in (self.smri_encoder.layer1, self.smri_encoder.layer2,
@@ -71,14 +76,18 @@ class Mamba_fusion(nn.Module):
             nn.init.constant_(m.bias, 0)
             nn.init.constant_(m.weight, 1.0)
 
-    def forward(self, smri, fmri, fmri_con):
-
+    def forward(self, smri, fmri, fmri_con, avail=None):
+        """avail: (b, 2) bool, which of (sMRI, fMRI) each patient has; None = both."""
         sMRI_f = self.smri_encoder(smri)
         fMRI_f = self.fmri_encoder(fmri.unsqueeze(1))
 
         b, c, h, w, z = sMRI_f.shape
         sMRI_f = self.smri_change(sMRI_f.view(b,c,-1))
         fMRI_f = self.fmri_change(fMRI_f.view(b,c,-1))
+        if self.gate is not None:
+            if avail is None:
+                avail = torch.ones(b, 2, dtype=torch.bool, device=sMRI_f.device)
+            sMRI_f, fMRI_f = self.gate([sMRI_f, fMRI_f], avail)
 
         cls_token_s = self.cls_token_s.expand(b, -1, -1)
         sMRI_c = torch.cat((cls_token_s, sMRI_f), dim=1)

@@ -95,6 +95,9 @@ def init_stratified_dataloader(cfg: DictConfig,
     if cfg.dataset.expand:
         cache = cfg.dataset.get("aug_cache") or str(Path(cfg.dataset.path).with_name("train_aug_smri.npy"))  # disk-backed 4x sMRI set
         final_timeseires_train, final_pearson_train, labels_train, smri_train = data_aug(final_timeseires_train, final_pearson_train, labels_train, smri_train, cache)
+        with open_dict(cfg):  # upstream counted steps before the 4x expansion (cos_lr period ~1/4 epoch)
+            cfg.steps_per_epoch = (len(labels_train) - 1) // cfg.dataset.batch_size + 1
+            cfg.total_steps = cfg.steps_per_epoch * cfg.training.epochs
     
     
     train_dataset = utils.TensorDataset(

@@ -1,4 +1,5 @@
 from utils import TotalMeter, count_params
+import json
 import torch
 import numpy as np
 from pathlib import Path
@@ -59,6 +60,63 @@ class Train:
             meter.reset()
        
 
+    def corrupt(self, f, s):
+        """Noisy / missing-modality training: per sample, drop one modality (flagged in avail, never
+        both) or add Gaussian noise of random strength. avail columns: (sMRI, fMRI). A missing input
+        is N(0, 1) noise, not zeros: inputs are z-scored, so it carries no subject information, and an
+        all-zero fMRI map hits the ConvNeXt LayerNorm/GRN singularities (NaN gradients upstream too)."""
+        t = self.config.training
+        p_miss, p_noise = t.get('corrupt_p_missing', 0.0), t.get('corrupt_p_noise', 0.0)
+        if p_miss == 0 and p_noise == 0:
+            return f, s, None
+        b, dev = f.shape[0], f.device
+        u = torch.rand(b, device=dev)
+        avail = torch.stack([u >= p_miss, (u < p_miss) | (u >= 2 * p_miss)], 1)
+        out = []
+        for x, ok in ((f, avail[:, 1]), (s, avail[:, 0])):
+            shape = (b,) + (1,) * (x.dim() - 1)
+            sigma = (torch.rand(shape, device=dev) < p_noise).float() * torch.rand(shape, device=dev) * t.corrupt_max_sigma
+            out.append(torch.where(ok.view(shape), x + sigma * torch.randn_like(x), torch.randn_like(x)))
+        return out[0], out[1], avail
+
+    @torch.no_grad()
+    def robustness(self):
+        """Last-epoch test metrics under fixed corruptions; with the gate, also mean reliability r,
+        fusion weight w and kept dims k as [r_s, r_f, w_s, w_f, k_s, k_f], plus per-subject values."""
+        conds = {'clean': None, 'fmri_noise_0.5': ('f', 0.5), 'fmri_noise_1.0': ('f', 1.0),
+                 'smri_noise_0.5': ('s', 0.5), 'smri_noise_1.0': ('s', 1.0),
+                 'fmri_missing': ('f', None), 'smri_missing': ('s', None)}
+        self.model.eval()
+        gate, out = self.model.fuse_encoder.gate, {}
+        for name, cond in conds.items():
+            g = torch.Generator(device='cuda').manual_seed(0)
+            preds, labels, rel = [], [], []
+            for f, c, y, s in self.test_dataloader:
+                f, c, s = f.cuda(), c.cuda(), s.cuda()
+                avail = torch.ones(len(f), 2, dtype=torch.bool, device='cuda')
+                if cond:
+                    m, sigma = cond
+                    x = f if m == 'f' else s
+                    noise = torch.randn(x.shape, generator=g, device='cuda')
+                    x = noise if sigma is None else x + sigma * noise  # missing = N(0,1), as in corrupt()
+                    avail[:, 1 if m == 'f' else 0] = sigma is not None
+                    f, s = (x, s) if m == 'f' else (f, x)
+                _, p1 = self.model(f, c, s, avail)
+                preds += p1.tolist(); labels += y.tolist()
+                if gate is not None:
+                    i = gate.info
+                    rel.append(torch.cat([i['reliability'], i['weight'], i['dims']], 1).cpu())
+            acc, spe, sen, f1, auc = calculate_metrics(preds, labels)
+            out[name] = dict(ACC=acc, SPE=spe, SEN=sen, F1=f1, AUC=auc)
+            if rel:
+                rel = torch.cat(rel)
+                out[name]['mean_r_w_k'] = rel.mean(0).tolist()
+                if name == 'clean':
+                    probs = F.softmax(torch.tensor(preds), 1)[:, -1].tolist()
+                    out[name]['subjects'] = [dict(label=int(np.argmax(l)), prob=p, r_w_k=v)
+                                             for l, p, v in zip(labels, probs, rel.tolist())]
+        return out
+
     def train_per_epoch(self, optimizer, lr_scheduler):
         self.model.train()
         pred_list = []
@@ -68,8 +126,10 @@ class Train:
             self.current_step += 1
             lr_scheduler.update(optimizer=optimizer, step=self.current_step)
             fMRI_Feature, fMRI_Con, label, sMRI_Feature = fMRI_Feature.cuda(), fMRI_Con.cuda(), label.cuda(), sMRI_Feature.cuda()
-            fMRI_Con, label = continus_mixup_data(fMRI_Con, y=label)
-            predict, predict1= self.model(fMRI_Feature, fMRI_Con, sMRI_Feature)
+            # Upstream mixed only fMRI_Con (unused by the model), so labels were mixed while inputs were not.
+            fMRI_Feature, sMRI_Feature, label = continus_mixup_data(fMRI_Feature, sMRI_Feature, y=label)
+            fMRI_Feature, sMRI_Feature, avail = self.corrupt(fMRI_Feature, sMRI_Feature)
+            predict, predict1= self.model(fMRI_Feature, fMRI_Con, sMRI_Feature, avail)
             loss = self.model.loss_function(predict, label, predict1)
 
             self.train_loss.update_with_weight_loss(loss.item(), label.shape[0])
@@ -136,6 +196,7 @@ class Train:
         best_epoch_metrics = {}
 
         for epoch in range(self.epochs):
+            self.model.epoch = epoch
             self.reset_meters()
             self.train_per_epoch(self.optimizers[0], self.lr_schedulers[0])
             val_result, val_result1, pred_list_val, pred_list_val1, label_list_val = self.test_per_epoch(self.val_dataloader,
@@ -198,4 +259,12 @@ class Train:
                 "Test AUC": test_result[4],
             })
 
+        final = {'seed': self.config.get('seed'), 'model': {k: self.config.model.get(k) for k in (
+                     'reliability_fusion', 'dynamic_dim', 'min_dim', 'nested_dropout', 'edl_weight')},
+                 'training': dict(self.config.training),
+                 'test_last_epoch': dict(zip(['ACC', 'SPE', 'SEN', 'F1', 'AUC'], map(float, test_result)))}
+        if self.config.training.get('robustness_eval', True):
+            final['robustness'] = self.robustness()
+        self.save_path.mkdir(exist_ok=True, parents=True)
+        json.dump(final, open(self.save_path / 'final.json', 'w'), indent=1, default=float)
         return test_result

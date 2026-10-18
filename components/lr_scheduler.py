@@ -47,7 +47,8 @@ class LRScheduler:
                 epoch = step // self.training_config.steps_per_epoch
                 self.lr = base_lr * lr_config.lr_decay ** epoch
             elif lr_mode == 'cos_lr':
-                current_ratio = (step % (total_steps // 100)) / (total_steps // 100)
+                period = max(1, total_steps // 100)  # upstream divided by zero below 100 total steps
+                current_ratio = (step % period) / period
                 cosine = math.cos(math.pi * current_ratio)
                 self.lr = target_lr + (base_lr - target_lr) * (1 + cosine) / 2
 

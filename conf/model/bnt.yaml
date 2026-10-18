@@ -16,3 +16,10 @@ d_conv: 3
 expand: 4
 cls_num: 4
 grad_checkpoint: false  # true = checkpoint encoder blocks (exact fp32 grads) so batch 16 fits a 4 GB GPU
+# Novelty (both false = repaired baseline). See models/CDCo_MambaNet/encoder/reliability.py
+reliability_fusion: false  # RAF: per-patient evidential reliability weights each modality's tokens
+dynamic_dim: false         # DFD: per-patient kept feature width, min_dim..fuse_shape, set by reliability
+min_dim: 12
+nested_dropout: 0.3        # share of training samples with an extra random width cut (orders the dims)
+edl_weight: 0.5
+edl_anneal_epochs: 10

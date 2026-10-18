@@ -63,11 +63,11 @@ def data_aug(time, pc, label, smri, cache):
     """Upstream data_aug, except the 4x sMRI set goes to a .npy memmap at `cache`.
 
     Upstream held it in RAM (~10 GB peak for ~230 training volumes; this machine has 8 GB).
-    Kept as upstream: Dropout and random_erase_3d modify `time`/`smri` in place, so original
-    ROI rows are cumulatively zeroed, and the j=1,2 sMRI entries were views of the originals
-    that torch.stack only materialised after all erasing, i.e. three identical doubly-erased
-    volumes. Dropped: the dead NaN `continue` (NaNs are zeroed on the line before) and the
-    final joint randperm (the train DataLoader shuffles anyway).
+    Repaired on this branch: upstream's Dropout and random_erase_3d modified `time`/`smri` in
+    place, cumulatively zeroing ~87% of each original's ROI rows and leaving three identical
+    doubly-erased copies of every volume. Here each augmented copy gets its own dropout/erasure
+    and the originals stay clean. Dropped: the dead NaN `continue` (NaNs are zeroed on the line
+    before) and the final joint randperm (the train DataLoader shuffles anyway).
     """
     augment_time = []
     augment_lable = []
@@ -79,7 +79,7 @@ def data_aug(time, pc, label, smri, cache):
     aug_times = 3
     for j in range(aug_times):
         for i in range(length):
-            data = time[i]
+            data = time[i].clone()
             label1 = label[i]
             smri1 = smri[i]
 
@@ -96,9 +96,8 @@ def data_aug(time, pc, label, smri, cache):
             if j == 0:
                 out[length + i] = random_rotate_3d(smri1).numpy()
             else:
-                random_erase_3d(smri1)
-    for k in (0, 2, 3):  # originals, then the two erase "copies" = final erased originals
-        out[k * length:(k + 1) * length] = smri.numpy()
+                out[(j + 1) * length + i] = random_erase_3d(smri1.clone()).numpy()
+    out[:length] = smri.numpy()
     out.flush()
 
     augment_time = torch.tensor(np.array(augment_time))

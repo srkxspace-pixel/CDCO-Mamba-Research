@@ -14,6 +14,9 @@ class CDCo_MambaNet(nn.Module):
         self.rate1 = config.model.rate1
         self.rate2 = config.model.rate2
         self.ct_loss = config.model.ct_loss
+        self.edl_weight = config.model.get('edl_weight', 0.5)
+        self.edl_anneal_epochs = config.model.get('edl_anneal_epochs', 10)
+        self.epoch = 0  # set by the trainer; anneals the evidential KL term
         self.apply(self._init_weights)
 
     def _init_weights(self, m):
@@ -21,9 +24,9 @@ class CDCo_MambaNet(nn.Module):
             nn.init.kaiming_uniform_(m.weight, a=math.sqrt(2.))
             if m.bias is not None:
                 nn.init.constant_(m.bias, 0)
-    
-    def forward(self, fmri_feature, fmri_con, smri_feature):
-        cls, cls1, contrastive_loss = self.fuse_encoder(smri_feature, fmri_feature, fmri_con)
+
+    def forward(self, fmri_feature, fmri_con, smri_feature, avail=None):
+        cls, cls1, contrastive_loss = self.fuse_encoder(smri_feature, fmri_feature, fmri_con, avail)
         self.contrastive_loss = contrastive_loss
         return cls, cls1
     
@@ -39,5 +42,9 @@ class CDCo_MambaNet(nn.Module):
         l3 = F.cross_entropy(pred1, F.softmax(pred2, dim=-1))
         l4 = F.cross_entropy(pred2, F.softmax(pred1, dim=-1))
 
-        return self.rate1*(l1+l2)+(1-self.rate1)*(l3+l4)+self.contrastive_loss*self.ct_loss
+        loss = self.rate1*(l1+l2)+(1-self.rate1)*(l3+l4)+self.contrastive_loss*self.ct_loss
+        gate = self.fuse_encoder.gate
+        if gate is not None:
+            loss = loss + self.edl_weight * gate.loss(label, min(1.0, self.epoch / max(1, self.edl_anneal_epochs)))
+        return loss
 
