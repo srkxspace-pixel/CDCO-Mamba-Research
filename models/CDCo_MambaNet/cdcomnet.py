@@ -14,6 +14,7 @@ class CDCo_MambaNet(nn.Module):
         self.rate1 = config.model.rate1
         self.rate2 = config.model.rate2
         self.ct_loss = config.model.ct_loss
+        self.distill_detach = config.model.get('distill_detach', False)
         self.edl_weight = config.model.get('edl_weight', 0.5)
         self.edl_anneal_epochs = config.model.get('edl_anneal_epochs', 10)
         self.epoch = 0  # set by the trainer; anneals the evidential KL term
@@ -39,8 +40,11 @@ class CDCo_MambaNet(nn.Module):
         pred1 = pred1 * self.rate2
         pred2 = pred2 * self.rate2
         
-        l3 = F.cross_entropy(pred1, F.softmax(pred2, dim=-1))
-        l4 = F.cross_entropy(pred2, F.softmax(pred1, dim=-1))
+        t2, t1 = F.softmax(pred2, dim=-1), F.softmax(pred1, dim=-1)
+        if self.distill_detach:  # peer prediction as a fixed target; upstream's open gradient collapses both heads
+            t1, t2 = t1.detach(), t2.detach()
+        l3 = F.cross_entropy(pred1, t2)
+        l4 = F.cross_entropy(pred2, t1)
 
         loss = self.rate1*(l1+l2)+(1-self.rate1)*(l3+l4)+self.contrastive_loss*self.ct_loss
         gate = self.fuse_encoder.gate

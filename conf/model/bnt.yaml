@@ -16,6 +16,7 @@ d_conv: 3
 expand: 4
 cls_num: 4
 grad_checkpoint: false  # true = checkpoint encoder blocks (exact fp32 grads) so batch 16 fits a 4 GB GPU
+distill_detach: true    # peer prediction is a fixed target in L_ct; upstream (false) collapses to one class
 # Novelty (both false = repaired baseline). See models/CDCo_MambaNet/encoder/reliability.py
 reliability_fusion: false  # RAF: per-patient evidential reliability weights each modality's tokens
 dynamic_dim: false         # DFD: per-patient kept feature width, min_dim..fuse_shape, set by reliability
