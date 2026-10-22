@@ -10,6 +10,7 @@ import argparse
 import json
 import sys
 import time
+import urllib.request
 import warnings
 from pathlib import Path
 
@@ -27,6 +28,7 @@ from models.CDCo_MambaNet import CDCo_MambaNet  # noqa: E402
 from training.training import CONDITIONS, robustness  # noqa: E402
 
 DEMO = ROOT / 'demo'
+WEIGHTS_URL = 'https://media.githubusercontent.com/media/srkxspace-pixel/CDCO-Mamba-Research/main/demo/'
 VARIANTS = {'baseline': [], 'full': ['model.reliability_fusion=true', 'model.dynamic_dim=true']}
 SHORT = ['clean', 'fmri_noise_1.0', 'smri_missing']
 
@@ -39,9 +41,11 @@ def load_model(variant, d):
         cfg.dataset.timeseries_sz = d['timeseries'].shape[2]
     model = CDCo_MambaNet(cfg)
     w = DEMO / f'{variant}_seed0.pt'
-    if w.stat().st_size < 1e6:
-        sys.exit(f'{w.name} is a Git LFS placeholder, not the weights: clone with git, or download the ZIP after the '
-                 f'repository enables Settings > General > Archives > "Include Git LFS objects in archives".')
+    if not w.exists() or w.stat().st_size < 1e6:  # missing, or a Git LFS placeholder (git without Git LFS, as on Kaggle)
+        print(f'  {w.name} is not here yet: downloading it from GitHub (111 MB)...', flush=True)
+        tmp = w.with_suffix('.part')
+        urllib.request.urlretrieve(WEIGHTS_URL + w.name, tmp)
+        tmp.replace(w)
     state = torch.load(w, map_location='cpu', weights_only=True)
     model.load_state_dict({k: v.float() if v.is_floating_point() else v for k, v in state.items()})
     return model.eval()

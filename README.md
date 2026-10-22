@@ -174,6 +174,17 @@ python3 -m venv .venv
 If Windows says `python` is not found, use `py` in the first line instead. Add `--all` to the last line for all
 7 test conditions (about 2 minutes).
 
+On Kaggle or Colab, run it in a notebook cell (PyTorch is already installed there):
+
+```python
+!git clone -q https://github.com/srkxspace-pixel/CDCO-Mamba-Research.git
+!pip install -q hydra-core omegaconf einops timm wandb
+!cd CDCO-Mamba-Research && python tools/demo.py
+```
+
+If the two model files are missing from your copy (for example a git clone without Git LFS, as on Kaggle), the
+demo downloads them from GitHub the first time (222 MB).
+
 **What each step shows:**
 
 - `metrics.py` prints `metric checks passed: SPE 0.666... SEN 0.333...`: the corrected sensitivity and
