@@ -1,0 +1,19 @@
+# Python 3.10 or 3.11. Install the PyTorch build for your machine first (CPU is fine for the checks):
+#   https://pytorch.org/get-started/locally/
+torch>=2.0
+numpy
+scipy
+pandas
+scikit-learn
+hydra-core>=1.3
+omegaconf>=2.3
+einops
+timm
+wandb
+matplotlib
+networkx
+# only for building the ABIDE data (tools/prepare_abide.py)
+SimpleITK
+nilearn
+# optional, Linux + CUDA only: the fast Mamba kernel (a pure-PyTorch fallback is used without it)
+# mamba-ssm
