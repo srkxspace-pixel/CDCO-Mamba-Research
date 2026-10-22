@@ -102,6 +102,9 @@ Next steps: supervise the gate with the known corruption, add the corruption-onl
 | No seeds | Runs not repeatable or paired | Seeded splits and initialisation |
 | Hyphenated package folder, two dataset files only as bytecode, one layer's source missing | Code could not be imported | Renamed, recovered, authors' `nn.Conv1d` alternative used |
 | Mamba CUDA kernel needs a Linux build | No run on Windows | Pure-PyTorch selective-scan fallback |
+| `.cuda()` calls inside the fusion block | No run on a CPU-only machine | Removed (the tensors are already on the right device) |
+| T1 registration sampled with a wall-clock seed | Every data build aligns the scans slightly differently | Fixed seed in `tools/prepare_abide.py` |
+| The second classifier head adds random noise to its input even at test time (`fuse_method1`) | Each evaluation is a random draw: Kaggle scored the same seed-0 weights 57.1% and 53.6% in two passes | Kept, as it is part of the evaluated model; the demo fixes the seed |
 
 The run in `results/` was made before the sensitivity/specificity fix, so its SPE and SEN columns are macro
 precision; accuracy, F1 and AUC are unaffected.
@@ -116,6 +119,9 @@ models/CDCo_MambaNet/        the model; encoder/reliability.py is the reliabilit
 training/                    training loop and metrics
 tools/prepare_abide.py       builds the 284-subject ABIDE cohort from public data
 tools/kaggle_novelty.py      paired baseline vs full experiment, one model per GPU
+tools/demo.py                runs the trained seed-0 models on their 28 test patients, on CPU
+tools/export_demo_data.py    rebuilds demo/abide_seed0_test.npz with the training code's own split
+demo/                        trained seed-0 weights (Git LFS), the 28 test patients, Kaggle's logged values
 notebooks/kaggle_run.ipynb   Kaggle notebook that runs the whole experiment
 results/kaggle_v3_run.log    log of the reported 10.3-hour run
 docs/                        the original authors' README and data notes
@@ -139,13 +145,45 @@ python training/metrics.py                            # correct sensitivity/spec
 python models/CDCo_MambaNet/encoder/reliability.py    # gate: missing scan -> weight 0 and 12 kept features
 ```
 
-**3. Build the data** (public ABIDE I; about 45 minutes on 4 cores; needs about 4 GB of disk, raw downloads included)
+**3. Live demo** (CPU, about 1 minute; clone with git so Git LFS fetches the 111 MB weight files)
+
+The two trained seed-0 models from the reported Kaggle run, and the 28 real ABIDE patients they were tested
+on, are in `demo/`. The demo runs both models with clean scans, with noise on the fMRI, and with the sMRI missing.
+
+```bash
+python tools/demo.py          # clean, fMRI noise 1.0, sMRI missing
+python tools/demo.py --all    # all 7 test conditions (about 2 minutes)
+```
+
+```
+Accuracy / AUC (%)         baseline       full (gate)
+  clean              53.6 /  46.9    64.3 /  62.2   Kaggle: 53.6 / 53.6   53.6 / 57.7
+  fmri_noise_1.0     53.6 /  48.5    60.7 /  65.8
+  smri_missing       46.4 /  41.8    50.0 /  46.9
+
+Gate in the full model (mean over subjects): weight sMRI / fMRI, features kept sMRI / fMRI (of 48)
+  clean             1.00 / 0.97    48.0 / 47.1
+  fmri_noise_1.0    0.98 / 0.98    47.5 / 47.4
+  smri_missing      0.00 / 1.00    12.0 / 48.0
+```
+
+It then lists each patient (ABIDE subject ID, site, diagnosis), the full model's P(autism), the value logged on
+Kaggle, and the gate's weights. What to read from it:
+
+- **The gate works as designed for a missing scan:** its weight drops to 0.00 and it keeps 12 of 48 features.
+  Noise barely moves the weights, which is the main finding of this project.
+- **The models are near chance:** every P(autism) lies between 0.39 and 0.57.
+- **One draw is not a result.** The original code adds random noise inside the model at test time (see Bugs), so
+  each evaluation of these 28 patients is a random draw; the demo fixes the seed so it prints the same numbers on
+  every run. The 5-seed results above are the evidence; the gap in this single draw is not.
+
+**4. Build the data** (public ABIDE I; about 45 minutes on 4 cores; needs about 4 GB of disk, raw downloads included)
 
 ```bash
 python tools/prepare_abide.py --root data/abide --workers 4
 ```
 
-**4. Train one model** (GPU; about 1.8 hours on a T4; use an absolute data path)
+**5. Train one model** (GPU; about 1.8 hours on a T4; use an absolute data path)
 
 ```bash
 WANDB_MODE=disabled python __main__.py dataset=ABIDE model=bnt model.cls_num=2 repeat_time=1 seed=0 \
@@ -155,7 +193,7 @@ WANDB_MODE=disabled python __main__.py dataset=ABIDE model=bnt model.cls_num=2 r
 # 4 GB GPU:   add  model.grad_checkpoint=true
 ```
 
-**5. Full experiment**: import `notebooks/kaggle_run.ipynb` into Kaggle, set *GPU T4 x2* and *Internet on*,
+**6. Full experiment**: import `notebooks/kaggle_run.ipynb` into Kaggle, set *GPU T4 x2* and *Internet on*,
 then *Save & Run All* (about 10.5 hours, unattended).
 
 ## Data
