@@ -6,4 +6,5 @@ result/
 wandb/
 *.npy
 *.npz
+!demo/abide_seed0_test.npz
 .venv/
