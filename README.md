@@ -127,33 +127,57 @@ results/kaggle_v3_run.log    log of the reported 10.3-hour run
 docs/                        the original authors' README and data notes
 ```
 
-## Quick start
+## Quick start: run the demo on any laptop
 
-**1. Install** (Python 3.10 or 3.11; a CPU is enough for the checks)
+No GPU needed. About 10 minutes in total, mostly installing; the demo itself takes about 1 minute.
 
-```bash
+**You need** Python 3.10 or 3.11 from [python.org](https://www.python.org/downloads/) (on Windows, tick
+*Add python.exe to PATH* in the installer) and internet for about 600 MB of downloads.
+
+**1. Get the code**, either way:
+
+- **ZIP:** on this page click **Code → Download ZIP** and unzip it (folder `CDCO-Mamba-Research-main`).
+- **git:** `git clone https://github.com/srkxspace-pixel/CDCO-Mamba-Research.git`
+
+**2. Open a terminal in that folder.** On Windows, open the folder in File Explorer, click the address bar,
+type `powershell` and press Enter.
+
+**3. Copy-paste these lines.**
+
+Windows (PowerShell or Command Prompt):
+
+```powershell
 python -m venv .venv
-source .venv/bin/activate            # Windows: .venv\Scripts\activate
-pip install torch --index-url https://download.pytorch.org/whl/cpu
-pip install -r requirements.txt
+.\.venv\Scripts\python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+.\.venv\Scripts\python -m pip install -r requirements.txt
+.\.venv\Scripts\python training\metrics.py
+.\.venv\Scripts\python models\CDCo_MambaNet\encoder\reliability.py
+.\.venv\Scripts\python tools\demo.py
 ```
 
-**2. Self-checks** (seconds each)
+macOS / Linux:
 
 ```bash
-python training/metrics.py                            # correct sensitivity/specificity on a known example
-python models/CDCo_MambaNet/encoder/reliability.py    # gate: missing scan -> weight 0 and 12 kept features
+python3 -m venv .venv
+.venv/bin/python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python training/metrics.py
+.venv/bin/python models/CDCo_MambaNet/encoder/reliability.py
+.venv/bin/python tools/demo.py
 ```
 
-**3. Live demo** (CPU, about 1 minute; clone with git so Git LFS fetches the 111 MB weight files)
+If Windows says `python` is not found, use `py` in the first line instead. Add `--all` to the last line for all
+7 test conditions (about 2 minutes).
 
-The two trained seed-0 models from the reported Kaggle run, and the 28 real ABIDE patients they were tested
-on, are in `demo/`. The demo runs both models with clean scans, with noise on the fMRI, and with the sMRI missing.
+**What each step shows:**
 
-```bash
-python tools/demo.py          # clean, fMRI noise 1.0, sMRI missing
-python tools/demo.py --all    # all 7 test conditions (about 2 minutes)
-```
+- `metrics.py` prints `metric checks passed: SPE 0.666... SEN 0.333...`: the corrected sensitivity and
+  specificity on a known example (the original code printed 0.5 for both).
+- `reliability.py` prints `reliability gate checks passed`: the gate gives a missing scan weight 0 and keeps
+  only 12 of its 48 features.
+- `demo.py` runs the two trained seed-0 models from the reported Kaggle run (`demo/*.pt`) on the 28 real ABIDE
+  patients they were tested on (`demo/abide_seed0_test.npz`), with clean scans, noise on the fMRI and the sMRI
+  missing:
 
 ```
 Accuracy / AUC (%)         baseline       full (gate)
@@ -177,13 +201,15 @@ Kaggle, and the gate's weights. What to read from it:
   each evaluation of these 28 patients is a random draw; the demo fixes the seed so it prints the same numbers on
   every run. The 5-seed results above are the evidence; the gap in this single draw is not.
 
-**4. Build the data** (public ABIDE I; about 45 minutes on 4 cores; needs about 4 GB of disk, raw downloads included)
+## Reproducing the full experiment (GPU)
+
+**1. Build the data** (public ABIDE I; about 45 minutes on 4 cores; needs about 4 GB of disk, raw downloads included)
 
 ```bash
 python tools/prepare_abide.py --root data/abide --workers 4
 ```
 
-**5. Train one model** (GPU; about 1.8 hours on a T4; use an absolute data path)
+**2. Train one model** (about 1.8 hours on a T4; use an absolute data path; on Windows set `$env:WANDB_MODE="disabled"` first)
 
 ```bash
 WANDB_MODE=disabled python __main__.py dataset=ABIDE model=bnt model.cls_num=2 repeat_time=1 seed=0 \
@@ -193,7 +219,7 @@ WANDB_MODE=disabled python __main__.py dataset=ABIDE model=bnt model.cls_num=2 r
 # 4 GB GPU:   add  model.grad_checkpoint=true
 ```
 
-**6. Full experiment**: import `notebooks/kaggle_run.ipynb` into Kaggle, set *GPU T4 x2* and *Internet on*,
+**3. Full experiment**: import `notebooks/kaggle_run.ipynb` into Kaggle, set *GPU T4 x2* and *Internet on*,
 then *Save & Run All* (about 10.5 hours, unattended).
 
 ## Data

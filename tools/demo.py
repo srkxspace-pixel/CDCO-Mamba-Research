@@ -40,7 +40,8 @@ def load_model(variant, d):
     model = CDCo_MambaNet(cfg)
     w = DEMO / f'{variant}_seed0.pt'
     if w.stat().st_size < 1e6:
-        sys.exit(f'{w.name} is a Git LFS placeholder: install Git LFS and run "git lfs pull" (clone with git, not the ZIP).')
+        sys.exit(f'{w.name} is a Git LFS placeholder, not the weights: clone with git, or download the ZIP after the '
+                 f'repository enables Settings > General > Archives > "Include Git LFS objects in archives".')
     state = torch.load(w, map_location='cpu', weights_only=True)
     model.load_state_dict({k: v.float() if v.is_floating_point() else v for k, v in state.items()})
     return model.eval()
