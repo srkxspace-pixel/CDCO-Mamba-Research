@@ -120,13 +120,13 @@ class Mamba_fusion(nn.Module):
         # 对比扰动不考虑cls_token
         fmri_cls_token = fmri[:,0,:].unsqueeze(1)
         fmri_feature = fmri[:,1:,:]
-        random_noise_f = torch.rand_like(fmri_feature).cuda()
+        random_noise_f = torch.rand_like(fmri_feature)
         fmri_feature = fmri_feature + torch.sign(fmri_feature) * F.normalize(random_noise_f)
         fmri_rc = torch.cat((fmri_cls_token, fmri_feature), dim=1)
 
         smri_cls_token = smri[:,0,:].unsqueeze(1)
         smri_feature = smri[:,1:,:]
-        random_noise_s = torch.rand_like(smri_feature).cuda()
+        random_noise_s = torch.rand_like(smri_feature)
         smri_feature = smri_feature + torch.sign(smri_feature) * F.normalize(random_noise_s)
         smri_rc = torch.cat((smri_cls_token, smri_feature), dim=1)
 
@@ -164,9 +164,9 @@ class Mamba_fusion(nn.Module):
         smri_fuse = (smri_y * fmri_z)
         sf_feature_o = torch.cat((fmri_fuse, smri_fuse), dim=1)
 
-        random_noise_f = torch.rand_like(fmri).cuda()
+        random_noise_f = torch.rand_like(fmri)
         fmri = fmri + torch.sign(fmri) * F.normalize(random_noise_f)
-        random_noise_s = torch.rand_like(smri).cuda()
+        random_noise_s = torch.rand_like(smri)
         smri = smri + torch.sign(smri) * F.normalize(random_noise_s)
         smri_y, smri_z = self.mamba_r1(smri)
         fmri_y, fmri_z = self.mamba_r2(fmri)

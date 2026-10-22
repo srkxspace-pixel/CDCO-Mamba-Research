@@ -13,6 +13,49 @@ from components import LRScheduler
 import logging
 from .metrics import calculate_metrics
 
+CONDITIONS = {'clean': None, 'fmri_noise_0.5': ('f', 0.5), 'fmri_noise_1.0': ('f', 1.0),
+              'smri_noise_0.5': ('s', 0.5), 'smri_noise_1.0': ('s', 1.0),
+              'fmri_missing': ('f', None), 'smri_missing': ('s', None)}
+
+
+@torch.no_grad()
+def robustness(model, loader, conds=CONDITIONS):
+    """Test metrics under fixed corruptions, on whatever device the model is on; with the gate, also
+    mean reliability r, fusion weight w and kept dims k as [r_s, r_f, w_s, w_f, k_s, k_f], plus
+    per-subject values. Noise is seeded per condition, so a subset of conditions draws the same noise."""
+    dev = next(model.parameters()).device
+    model.eval()
+    gate, out = model.fuse_encoder.gate, {}
+    for name, cond in conds.items():
+        g = torch.Generator(device=dev).manual_seed(0)
+        preds, labels, rel = [], [], []
+        for f, c, y, s in loader:
+            f, c, s = f.to(dev), c.to(dev), s.to(dev)
+            avail = torch.ones(len(f), 2, dtype=torch.bool, device=dev)
+            if cond:
+                m, sigma = cond
+                x = f if m == 'f' else s
+                noise = torch.randn(x.shape, generator=g, device=dev)
+                x = noise if sigma is None else x + sigma * noise  # missing = N(0,1), as in corrupt()
+                avail[:, 1 if m == 'f' else 0] = sigma is not None
+                f, s = (x, s) if m == 'f' else (f, x)
+            _, p1 = model(f, c, s, avail)
+            preds += p1.tolist(); labels += y.tolist()
+            if gate is not None:
+                i = gate.info
+                rel.append(torch.cat([i['reliability'], i['weight'], i['dims']], 1).cpu())
+        acc, spe, sen, f1, auc = calculate_metrics(preds, labels)
+        out[name] = dict(ACC=acc, SPE=spe, SEN=sen, F1=f1, AUC=auc)
+        probs = F.softmax(torch.tensor(preds), 1)[:, -1].tolist()
+        if rel:
+            rel = torch.cat(rel)
+            out[name]['mean_r_w_k'] = rel.mean(0).tolist()
+            if name == 'clean':
+                out[name]['subjects'] = [dict(label=int(np.argmax(l)), prob=p, r_w_k=v)
+                                         for l, p, v in zip(labels, probs, rel.tolist())]
+        out[name]['probs'] = probs
+    return out
+
 
 class Train:
 
@@ -79,43 +122,8 @@ class Train:
             out.append(torch.where(ok.view(shape), x + sigma * torch.randn_like(x), torch.randn_like(x)))
         return out[0], out[1], avail
 
-    @torch.no_grad()
     def robustness(self):
-        """Last-epoch test metrics under fixed corruptions; with the gate, also mean reliability r,
-        fusion weight w and kept dims k as [r_s, r_f, w_s, w_f, k_s, k_f], plus per-subject values."""
-        conds = {'clean': None, 'fmri_noise_0.5': ('f', 0.5), 'fmri_noise_1.0': ('f', 1.0),
-                 'smri_noise_0.5': ('s', 0.5), 'smri_noise_1.0': ('s', 1.0),
-                 'fmri_missing': ('f', None), 'smri_missing': ('s', None)}
-        self.model.eval()
-        gate, out = self.model.fuse_encoder.gate, {}
-        for name, cond in conds.items():
-            g = torch.Generator(device='cuda').manual_seed(0)
-            preds, labels, rel = [], [], []
-            for f, c, y, s in self.test_dataloader:
-                f, c, s = f.cuda(), c.cuda(), s.cuda()
-                avail = torch.ones(len(f), 2, dtype=torch.bool, device='cuda')
-                if cond:
-                    m, sigma = cond
-                    x = f if m == 'f' else s
-                    noise = torch.randn(x.shape, generator=g, device='cuda')
-                    x = noise if sigma is None else x + sigma * noise  # missing = N(0,1), as in corrupt()
-                    avail[:, 1 if m == 'f' else 0] = sigma is not None
-                    f, s = (x, s) if m == 'f' else (f, x)
-                _, p1 = self.model(f, c, s, avail)
-                preds += p1.tolist(); labels += y.tolist()
-                if gate is not None:
-                    i = gate.info
-                    rel.append(torch.cat([i['reliability'], i['weight'], i['dims']], 1).cpu())
-            acc, spe, sen, f1, auc = calculate_metrics(preds, labels)
-            out[name] = dict(ACC=acc, SPE=spe, SEN=sen, F1=f1, AUC=auc)
-            if rel:
-                rel = torch.cat(rel)
-                out[name]['mean_r_w_k'] = rel.mean(0).tolist()
-                if name == 'clean':
-                    probs = F.softmax(torch.tensor(preds), 1)[:, -1].tolist()
-                    out[name]['subjects'] = [dict(label=int(np.argmax(l)), prob=p, r_w_k=v)
-                                             for l, p, v in zip(labels, probs, rel.tolist())]
-        return out
+        return robustness(self.model, self.test_dataloader)
 
     def train_per_epoch(self, optimizer, lr_scheduler):
         self.model.train()

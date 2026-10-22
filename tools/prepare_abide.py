@@ -83,7 +83,7 @@ def _register(fixed, moving, tx):
     r = sitk.ImageRegistrationMethod()
     r.SetMetricAsMattesMutualInformation(32)
     r.SetMetricSamplingStrategy(r.RANDOM)
-    r.SetMetricSamplingPercentage(0.05, 0)
+    r.SetMetricSamplingPercentage(0.05, 1)  # fixed seed; 0 means wall clock, so every build aligned differently
     r.SetInterpolator(sitk.sitkLinear)
     r.SetOptimizerAsRegularStepGradientDescent(1.0, 1e-4, 300, relaxationFactor=0.5)
     r.SetOptimizerScalesFromPhysicalShift()
