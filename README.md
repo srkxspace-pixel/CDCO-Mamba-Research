@@ -51,7 +51,9 @@ All of it is switched by config; with every switch off the model is the repaired
 ## Results
 
 Kaggle, 2 × NVIDIA T4, 5 seeds, 100 epochs, last epoch reported, 28 test subjects per seed (stratified
-80/10/10 split). Full log: [`results/kaggle_v3_run.log`](results/kaggle_v3_run.log).
+80/10/10 split). Full log: [`results/kaggle_v3_run.log`](results/kaggle_v3_run.log); the executed notebook with
+its output: [`notebooks/kaggle_v3_executed.ipynb`](notebooks/kaggle_v3_executed.ipynb)
+([how it works](notebooks/README.md)).
 
 **Clean test set**
 
@@ -122,7 +124,9 @@ tools/kaggle_novelty.py      paired baseline vs full experiment, one model per G
 tools/demo.py                runs the trained seed-0 models on their 28 test patients, on CPU
 tools/export_demo_data.py    rebuilds demo/abide_seed0_test.npz with the training code's own split
 demo/                        trained seed-0 weights (Git LFS), the 28 test patients, Kaggle's logged values
-notebooks/kaggle_run.ipynb   Kaggle notebook that runs the whole experiment
+tools/verify_kaggle_notebook.py  checks the executed Kaggle notebook ran exactly this repository's code
+notebooks/kaggle_v3_executed.ipynb  the Kaggle notebook that produced the reported results, with its output
+notebooks/kaggle_run.ipynb   Kaggle notebook to run the whole experiment again (see notebooks/README.md)
 results/kaggle_v3_run.log    log of the reported 10.3-hour run
 docs/                        the original authors' README and data notes
 ```
@@ -139,8 +143,9 @@ No GPU needed. About 10 minutes in total, mostly installing; the demo itself tak
 - **ZIP:** on this page click **Code → Download ZIP** and unzip it (folder `CDCO-Mamba-Research-main`).
 - **git:** `git clone https://github.com/srkxspace-pixel/CDCO-Mamba-Research.git`
 
-**2. Open a terminal in that folder.** On Windows, open the folder in File Explorer, click the address bar,
-type `powershell` and press Enter.
+**2. Open a terminal in that folder**, the one that contains `requirements.txt`. Windows' *Extract All* puts it one
+level down (`CDCO-Mamba-Research-main\CDCO-Mamba-Research-main`), so open the inner folder. On Windows, open it in
+File Explorer, click the address bar, type `powershell` and press Enter.
 
 **3. Copy-paste these lines.**
 
