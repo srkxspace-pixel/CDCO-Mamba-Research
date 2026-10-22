@@ -1,0 +1,177 @@
+    14.6s  /kaggle/working/novelty.patch.gz: OK
+    30.0s  torch 2.11.0+cu128 | GPUs: ['Tesla T4', 'Tesla T4']
+    30.0s  no attached ABIDE dataset: rebuilding it from public ABIDE (about 40 min)
+    30.0s  $ /usr/bin/python3 -m pip install -q SimpleITK nilearn
+    33.3s  $ /usr/bin/python3 -u /kaggle/working/CDCo-MambaNet/tools/prepare_abide.py --root /tmp/abide --workers 4
+    34.7s  304 candidates with a T1w
+    38.3s  [fetch_icbm152_2009] Added README.md to /tmp/abide/templates
+    38.3s  [fetch_icbm152_2009] Dataset created in /tmp/abide/templates/icbm152_2009
+    38.3s  [fetch_icbm152_2009] Downloading data from https://osf.io/7pj92/download ...
+    40.7s  [fetch_icbm152_2009]  ...done. (2 seconds, 0 min)
+    40.7s  [fetch_icbm152_2009] Extracting data from /tmp/abide/templates/icbm152_2009/8b577b02297a1daa5fa2712e613975ef/download...
+    40.8s  [fetch_icbm152_2009] .. done.
+    67.4s  downloaded 304/304
+   270.5s  sMRI preprocessed 20/304
+   426.5s  sMRI preprocessed 40/304
+   613.9s  sMRI preprocessed 60/304
+   802.2s  sMRI preprocessed 80/304
+   960.3s  sMRI preprocessed 100/304
+  1113.2s  sMRI preprocessed 120/304
+  1272.8s  sMRI preprocessed 140/304
+  1444.0s  sMRI preprocessed 160/304
+  1620.7s  sMRI preprocessed 180/304
+  1793.1s  sMRI preprocessed 200/304
+  1952.2s  sMRI preprocessed 220/304
+  2144.1s  sMRI preprocessed 240/304
+  2327.8s  sMRI preprocessed 260/304
+  2538.0s  sMRI preprocessed 280/304
+  2725.0s  sMRI preprocessed 300/304
+  2745.9s  cohort: 284 (TC 144, ASD 140), age 13.09+-2.83, min NCC 0.157, sites 17
+  2753.5s  wrote /tmp/abide/abide_284.npy (284, 116, 115) (284, 116, 116) (284, 1, 96, 96, 96)
+  2753.9s  [0.76 h] baseline_seed0 started on GPU 0
+  2753.9s  [0.76 h] full_seed0 started on GPU 1
+  2753.9s  [0.76 h] baseline_seed0: preparing data / augmentation
+  2753.9s  [0.76 h] full_seed0: preparing data / augmentation
+  3653.8s  [1.01 h] baseline_seed0: Epoch[11/100] | Train Loss: 1.39607 | Train Accuracy: 0.51322 | Train Acc: 0.52863 | Val Loss: 1.39232 | Val Accuracy: 0
+  3653.8s  [1.01 h] full_seed0: Epoch[11/100] | Train Loss: 2.38321 | Train Accuracy: 0.48899 | Train Acc: 0.51542 | Val Loss: 2.35790 | Val Accuracy: 0
+  4553.9s  [1.26 h] baseline_seed0: Epoch[26/100] | Train Loss: 1.38999 | Train Accuracy: 0.51872 | Train Acc: 0.52974 | Val Loss: 1.39177 | Val Accuracy: 0
+  4553.9s  [1.26 h] full_seed0: Epoch[25/100] | Train Loss: 2.40282 | Train Accuracy: 0.47357 | Train Acc: 0.51101 | Val Loss: 2.35261 | Val Accuracy: 0
+  5453.9s  [1.51 h] baseline_seed0: Epoch[40/100] | Train Loss: 1.38840 | Train Accuracy: 0.52203 | Train Acc: 0.57048 | Val Loss: 1.38798 | Val Accuracy: 0
+  5453.9s  [1.51 h] full_seed0: Epoch[38/100] | Train Loss: 2.40527 | Train Accuracy: 0.49890 | Train Acc: 0.54405 | Val Loss: 2.34327 | Val Accuracy: 0
+  6353.9s  [1.76 h] baseline_seed0: Epoch[55/100] | Train Loss: 1.39044 | Train Accuracy: 0.47907 | Train Acc: 0.58040 | Val Loss: 1.38558 | Val Accuracy: 0
+  6353.9s  [1.76 h] full_seed0: Epoch[52/100] | Train Loss: 2.38268 | Train Accuracy: 0.52974 | Train Acc: 0.53965 | Val Loss: 2.34733 | Val Accuracy: 0
+  7253.9s  [2.01 h] baseline_seed0: Epoch[69/100] | Train Loss: 1.38815 | Train Accuracy: 0.52643 | Train Acc: 0.60132 | Val Loss: 1.38802 | Val Accuracy: 0
+  7253.9s  [2.01 h] full_seed0: Epoch[66/100] | Train Loss: 2.37215 | Train Accuracy: 0.53194 | Train Acc: 0.54185 | Val Loss: 2.34260 | Val Accuracy: 0
+  8153.9s  [2.26 h] baseline_seed0: Epoch[84/100] | Train Loss: 1.38627 | Train Accuracy: 0.55286 | Train Acc: 0.60683 | Val Loss: 1.38805 | Val Accuracy: 0
+  8153.9s  [2.26 h] full_seed0: Epoch[80/100] | Train Loss: 2.34696 | Train Accuracy: 0.52863 | Train Acc: 0.56608 | Val Loss: 2.33804 | Val Accuracy: 0
+  9053.9s  [2.51 h] baseline_seed0: Epoch[98/100] | Train Loss: 1.38604 | Train Accuracy: 0.56498 | Train Acc: 0.67511 | Val Loss: 1.38838 | Val Accuracy: 0
+  9053.9s  [2.51 h] full_seed0: Epoch[94/100] | Train Loss: 2.35175 | Train Accuracy: 0.50991 | Train Acc: 0.59141 | Val Loss: 2.33583 | Val Accuracy: 0
+  9083.9s  [2.52 h] baseline_seed0 finished (exit 0) in 1.76 h
+  9113.9s  [2.52 h] baseline_seed1 started on GPU 0
+  9383.9s  [2.60 h] full_seed0 finished (exit 0) in 1.84 h
+  9413.9s  [2.61 h] full_seed1 started on GPU 1
+  9953.9s  [2.76 h] baseline_seed1: Epoch[11/100] | Train Loss: 1.39770 | Train Accuracy: 0.50000 | Train Acc: 0.54295 | Val Loss: 1.39412 | Val Accuracy: 0
+  9953.9s  [2.76 h] full_seed1: Epoch[6/100] | Train Loss: 2.43495 | Train Accuracy: 0.50110 | Train Acc: 0.51762 | Val Loss: 2.35736 | Val Accuracy: 0.
+ 10853.9s  [3.01 h] baseline_seed1: Epoch[25/100] | Train Loss: 1.39259 | Train Accuracy: 0.49890 | Train Acc: 0.52643 | Val Loss: 1.39153 | Val Accuracy: 0
+ 10853.9s  [3.01 h] full_seed1: Epoch[20/100] | Train Loss: 2.36469 | Train Accuracy: 0.53414 | Train Acc: 0.52643 | Val Loss: 2.34440 | Val Accuracy: 0
+ 11753.9s  [3.26 h] baseline_seed1: Epoch[40/100] | Train Loss: 1.38761 | Train Accuracy: 0.51542 | Train Acc: 0.55507 | Val Loss: 1.38901 | Val Accuracy: 0
+ 11753.9s  [3.26 h] full_seed1: Epoch[34/100] | Train Loss: 2.34309 | Train Accuracy: 0.55066 | Train Acc: 0.54956 | Val Loss: 2.34278 | Val Accuracy: 0
+ 12653.9s  [3.51 h] baseline_seed1: Epoch[55/100] | Train Loss: 1.38872 | Train Accuracy: 0.49339 | Train Acc: 0.58590 | Val Loss: 1.38816 | Val Accuracy: 0
+ 12653.9s  [3.51 h] full_seed1: Epoch[48/100] | Train Loss: 2.33347 | Train Accuracy: 0.54846 | Train Acc: 0.53414 | Val Loss: 2.34193 | Val Accuracy: 0
+ 13553.9s  [3.76 h] baseline_seed1: Epoch[69/100] | Train Loss: 1.38961 | Train Accuracy: 0.50991 | Train Acc: 0.59692 | Val Loss: 1.38578 | Val Accuracy: 0
+ 13553.9s  [3.76 h] full_seed1: Epoch[63/100] | Train Loss: 2.34242 | Train Accuracy: 0.59471 | Train Acc: 0.61344 | Val Loss: 2.34098 | Val Accuracy: 0
+ 14453.9s  [4.01 h] baseline_seed1: Epoch[84/100] | Train Loss: 1.39028 | Train Accuracy: 0.52863 | Train Acc: 0.59361 | Val Loss: 1.38609 | Val Accuracy: 0
+ 14453.9s  [4.01 h] full_seed1: Epoch[77/100] | Train Loss: 2.32909 | Train Accuracy: 0.65529 | Train Acc: 0.63877 | Val Loss: 2.34272 | Val Accuracy: 0
+ 15353.9s  [4.26 h] baseline_seed1 finished (exit 0) in 1.73 h
+ 15353.9s  [4.26 h] full_seed1: Epoch[91/100] | Train Loss: 2.30056 | Train Accuracy: 0.64097 | Train Acc: 0.67401 | Val Loss: 2.34570 | Val Accuracy: 0
+ 15384.0s  [4.27 h] baseline_seed2 started on GPU 0
+ 15834.0s  [4.39 h] full_seed1 finished (exit 0) in 1.78 h
+ 15864.0s  [4.40 h] full_seed2 started on GPU 1
+ 16253.9s  [4.51 h] baseline_seed2: Epoch[11/100] | Train Loss: 1.39542 | Train Accuracy: 0.53414 | Train Acc: 0.51872 | Val Loss: 1.39963 | Val Accuracy: 0
+ 16253.9s  [4.51 h] full_seed2: Epoch[3/100] | Train Loss: 2.47809 | Train Accuracy: 0.49009 | Train Acc: 0.49780 | Val Loss: 2.36013 | Val Accuracy: 0.
+ 17154.0s  [4.76 h] baseline_seed2: Epoch[24/100] | Train Loss: 1.39560 | Train Accuracy: 0.49890 | Train Acc: 0.57159 | Val Loss: 1.39400 | Val Accuracy: 0
+ 17154.0s  [4.76 h] full_seed2: Epoch[16/100] | Train Loss: 2.41031 | Train Accuracy: 0.49119 | Train Acc: 0.46476 | Val Loss: 2.35146 | Val Accuracy: 0
+ 18054.0s  [5.01 h] baseline_seed2: Epoch[38/100] | Train Loss: 1.39234 | Train Accuracy: 0.53304 | Train Acc: 0.58260 | Val Loss: 1.38753 | Val Accuracy: 0
+ 18054.0s  [5.01 h] full_seed2: Epoch[29/100] | Train Loss: 2.36739 | Train Accuracy: 0.53634 | Train Acc: 0.54075 | Val Loss: 2.34980 | Val Accuracy: 0
+ 18954.0s  [5.26 h] baseline_seed2: Epoch[51/100] | Train Loss: 1.38671 | Train Accuracy: 0.53634 | Train Acc: 0.60463 | Val Loss: 1.38708 | Val Accuracy: 0
+ 18954.0s  [5.26 h] full_seed2: Epoch[42/100] | Train Loss: 2.37462 | Train Accuracy: 0.50881 | Train Acc: 0.50661 | Val Loss: 2.34582 | Val Accuracy: 0
+ 19854.0s  [5.51 h] baseline_seed2: Epoch[64/100] | Train Loss: 1.39106 | Train Accuracy: 0.51322 | Train Acc: 0.64648 | Val Loss: 1.38941 | Val Accuracy: 0
+ 19854.0s  [5.51 h] full_seed2: Epoch[55/100] | Train Loss: 2.34427 | Train Accuracy: 0.52643 | Train Acc: 0.53744 | Val Loss: 2.34981 | Val Accuracy: 0
+ 20754.0s  [5.76 h] baseline_seed2: Epoch[78/100] | Train Loss: 1.38317 | Train Accuracy: 0.54405 | Train Acc: 0.68062 | Val Loss: 1.38750 | Val Accuracy: 0
+ 20754.0s  [5.76 h] full_seed2: Epoch[69/100] | Train Loss: 2.33880 | Train Accuracy: 0.50441 | Train Acc: 0.58480 | Val Loss: 2.34216 | Val Accuracy: 0
+ 21654.0s  [6.01 h] baseline_seed2: Epoch[91/100] | Train Loss: 1.38113 | Train Accuracy: 0.57159 | Train Acc: 0.74119 | Val Loss: 1.38374 | Val Accuracy: 0
+ 21654.0s  [6.01 h] full_seed2: Epoch[82/100] | Train Loss: 2.34821 | Train Accuracy: 0.55286 | Train Acc: 0.60793 | Val Loss: 2.34333 | Val Accuracy: 0
+ 22164.0s  [6.15 h] baseline_seed2 finished (exit 0) in 1.88 h
+ 22194.0s  [6.16 h] baseline_seed3 started on GPU 0
+ 22554.0s  [6.26 h] full_seed2: Epoch[95/100] | Train Loss: 2.35460 | Train Accuracy: 0.54846 | Train Acc: 0.61233 | Val Loss: 2.34369 | Val Accuracy: 0
+ 22554.0s  [6.26 h] baseline_seed3: Epoch[3/100] | Train Loss: 1.47589 | Train Accuracy: 0.52313 | Train Acc: 0.48899 | Val Loss: 1.44475 | Val Accuracy: 0.
+ 22824.0s  [6.33 h] full_seed2 finished (exit 0) in 1.93 h
+ 22854.0s  [6.34 h] full_seed3 started on GPU 1
+ 23454.0s  [6.51 h] baseline_seed3: Epoch[16/100] | Train Loss: 1.39384 | Train Accuracy: 0.47907 | Train Acc: 0.54185 | Val Loss: 1.38953 | Val Accuracy: 0
+ 23454.0s  [6.51 h] full_seed3: Epoch[6/100] | Train Loss: 2.39004 | Train Accuracy: 0.49890 | Train Acc: 0.46586 | Val Loss: 2.36141 | Val Accuracy: 0.
+ 24354.0s  [6.76 h] baseline_seed3: Epoch[30/100] | Train Loss: 1.39103 | Train Accuracy: 0.49670 | Train Acc: 0.52423 | Val Loss: 1.39122 | Val Accuracy: 0
+ 24354.0s  [6.76 h] full_seed3: Epoch[19/100] | Train Loss: 2.34896 | Train Accuracy: 0.50771 | Train Acc: 0.53965 | Val Loss: 2.35679 | Val Accuracy: 0
+ 25254.0s  [7.01 h] baseline_seed3: Epoch[43/100] | Train Loss: 1.39042 | Train Accuracy: 0.50991 | Train Acc: 0.54405 | Val Loss: 1.38863 | Val Accuracy: 0
+ 25254.0s  [7.01 h] full_seed3: Epoch[32/100] | Train Loss: 2.35813 | Train Accuracy: 0.52313 | Train Acc: 0.53524 | Val Loss: 2.35129 | Val Accuracy: 0
+ 26154.0s  [7.26 h] baseline_seed3: Epoch[56/100] | Train Loss: 1.38855 | Train Accuracy: 0.49229 | Train Acc: 0.58150 | Val Loss: 1.38588 | Val Accuracy: 0
+ 26154.0s  [7.26 h] full_seed3: Epoch[45/100] | Train Loss: 2.35674 | Train Accuracy: 0.51762 | Train Acc: 0.55507 | Val Loss: 2.34953 | Val Accuracy: 0
+ 27054.0s  [7.51 h] baseline_seed3: Epoch[69/100] | Train Loss: 1.39015 | Train Accuracy: 0.51322 | Train Acc: 0.57048 | Val Loss: 1.38529 | Val Accuracy: 0
+ 27054.0s  [7.51 h] full_seed3: Epoch[57/100] | Train Loss: 2.33670 | Train Accuracy: 0.54075 | Train Acc: 0.56608 | Val Loss: 2.34534 | Val Accuracy: 0
+ 27954.0s  [7.76 h] baseline_seed3: Epoch[82/100] | Train Loss: 1.38787 | Train Accuracy: 0.51982 | Train Acc: 0.59361 | Val Loss: 1.38690 | Val Accuracy: 0
+ 27954.0s  [7.76 h] full_seed3: Epoch[70/100] | Train Loss: 2.35087 | Train Accuracy: 0.57159 | Train Acc: 0.64648 | Val Loss: 2.34645 | Val Accuracy: 0
+ 28854.1s  [8.01 h] baseline_seed3: Epoch[95/100] | Train Loss: 1.38842 | Train Accuracy: 0.51432 | Train Acc: 0.62996 | Val Loss: 1.38624 | Val Accuracy: 0
+ 28854.1s  [8.01 h] full_seed3: Epoch[82/100] | Train Loss: 2.32482 | Train Accuracy: 0.58150 | Train Acc: 0.65639 | Val Loss: 2.34668 | Val Accuracy: 0
+ 29124.1s  [8.08 h] baseline_seed3 finished (exit 0) in 1.93 h
+ 29154.0s  [8.09 h] baseline_seed4 started on GPU 0
+ 29754.0s  [8.26 h] full_seed3: Epoch[95/100] | Train Loss: 2.33161 | Train Accuracy: 0.67181 | Train Acc: 0.72687 | Val Loss: 2.34719 | Val Accuracy: 0
+ 29754.0s  [8.26 h] baseline_seed4: Epoch[6/100] | Train Loss: 1.41589 | Train Accuracy: 0.50991 | Train Acc: 0.50881 | Val Loss: 1.40526 | Val Accuracy: 0.
+ 30054.0s  [8.34 h] full_seed3 finished (exit 0) in 2.00 h
+ 30084.1s  [8.35 h] full_seed4 started on GPU 1
+ 30654.1s  [8.51 h] baseline_seed4: Epoch[20/100] | Train Loss: 1.39110 | Train Accuracy: 0.50330 | Train Acc: 0.58590 | Val Loss: 1.39140 | Val Accuracy: 0
+ 30654.1s  [8.51 h] full_seed4: Epoch[6/100] | Train Loss: 2.37558 | Train Accuracy: 0.51982 | Train Acc: 0.49229 | Val Loss: 2.35566 | Val Accuracy: 0.
+ 31554.1s  [8.76 h] baseline_seed4: Epoch[34/100] | Train Loss: 1.39371 | Train Accuracy: 0.49890 | Train Acc: 0.59912 | Val Loss: 1.39241 | Val Accuracy: 0
+ 31554.1s  [8.76 h] full_seed4: Epoch[19/100] | Train Loss: 2.40125 | Train Accuracy: 0.51432 | Train Acc: 0.51542 | Val Loss: 2.34872 | Val Accuracy: 0
+ 32454.1s  [9.01 h] baseline_seed4: Epoch[48/100] | Train Loss: 1.38928 | Train Accuracy: 0.54736 | Train Acc: 0.63987 | Val Loss: 1.39017 | Val Accuracy: 0
+ 32454.1s  [9.01 h] full_seed4: Epoch[33/100] | Train Loss: 2.36932 | Train Accuracy: 0.52643 | Train Acc: 0.53855 | Val Loss: 2.34533 | Val Accuracy: 0
+ 33354.1s  [9.26 h] baseline_seed4: Epoch[63/100] | Train Loss: 1.38547 | Train Accuracy: 0.55507 | Train Acc: 0.65529 | Val Loss: 1.39142 | Val Accuracy: 0
+ 33354.1s  [9.26 h] full_seed4: Epoch[46/100] | Train Loss: 2.36254 | Train Accuracy: 0.51322 | Train Acc: 0.54626 | Val Loss: 2.34280 | Val Accuracy: 0
+ 34254.1s  [9.51 h] baseline_seed4: Epoch[77/100] | Train Loss: 1.38521 | Train Accuracy: 0.51872 | Train Acc: 0.65529 | Val Loss: 1.39645 | Val Accuracy: 0
+ 34254.1s  [9.51 h] full_seed4: Epoch[60/100] | Train Loss: 2.34957 | Train Accuracy: 0.52093 | Train Acc: 0.58811 | Val Loss: 2.34372 | Val Accuracy: 0
+ 35154.1s  [9.76 h] baseline_seed4: Epoch[90/100] | Train Loss: 1.38505 | Train Accuracy: 0.55176 | Train Acc: 0.71586 | Val Loss: 1.39243 | Val Accuracy: 0
+ 35154.1s  [9.76 h] full_seed4: Epoch[73/100] | Train Loss: 2.34778 | Train Accuracy: 0.54515 | Train Acc: 0.60022 | Val Loss: 2.34267 | Val Accuracy: 0
+ 35724.1s  [9.92 h] baseline_seed4 finished (exit 0) in 1.83 h
+ 36054.1s  [10.01 h] full_seed4: Epoch[86/100] | Train Loss: 2.34546 | Train Accuracy: 0.53965 | Train Acc: 0.60573 | Val Loss: 2.34082 | Val Accuracy: 0
+ 36954.1s  [10.26 h] full_seed4 finished (exit 0) in 1.91 h
+ 36984.4s  completed runs: {'baseline': [0, 1, 2, 3, 4], 'full': [0, 1, 2, 3, 4]}
+ 36984.4s  Clean test set, last epoch (%; mean ± std over seeds)
+ 36984.4s  ACC            SPE            SEN             F1            AUC
+ 36984.4s  variant
+ 36984.4s  baseline  55.00 ± 7.82   56.48 ± 8.62   56.48 ± 8.62   53.00 ± 7.60  55.41 ± 13.85
+ 36984.4s  full      53.57 ± 9.78  54.07 ± 10.13  54.07 ± 10.13  51.79 ± 10.40  56.33 ± 13.83
+ 36984.4s  Robustness, ACC (%)
+ 36984.4s  variant             baseline           full
+ 36984.4s  condition
+ 36984.4s  clean           55.00 ± 7.82   53.57 ± 9.78
+ 36984.4s  fmri_noise_0.5  55.00 ± 7.82  50.71 ± 11.41
+ 36984.4s  fmri_noise_1.0  55.00 ± 7.82  50.00 ± 14.51
+ 36984.4s  smri_noise_0.5  57.14 ± 2.53  48.57 ± 10.59
+ 36984.4s  smri_noise_1.0  52.86 ± 5.87   48.57 ± 7.82
+ 36984.4s  fmri_missing    54.29 ± 6.87  49.29 ± 15.85
+ 36984.4s  smri_missing    54.29 ± 8.53   47.14 ± 4.66
+ 36984.4s  Robustness, AUC (%)
+ 36984.4s  variant              baseline           full
+ 36984.4s  condition
+ 36984.4s  clean           55.41 ± 13.85  56.33 ± 13.83
+ 36984.4s  fmri_noise_0.5  55.71 ± 12.87  57.24 ± 14.62
+ 36984.4s  fmri_noise_1.0  55.92 ± 13.88  55.61 ± 15.01
+ 36984.4s  smri_noise_0.5   54.59 ± 5.90  49.39 ± 12.13
+ 36984.4s  smri_noise_1.0   52.65 ± 6.19   52.96 ± 9.61
+ 36984.4s  fmri_missing    55.41 ± 13.06  50.31 ± 14.08
+ 36984.4s  smri_missing     55.20 ± 9.17   41.63 ± 6.76
+ 36985.1s  full - baseline, paired by seed (percentage points)
+ 36985.1s  condition metric  seeds  mean_diff  full_better  p_paired_t
+ 36985.1s  clean    ACC      5      -1.43            1       0.477
+ 36985.1s  clean    AUC      5       0.92            3       0.766
+ 36985.1s  fmri_noise_0.5    ACC      5      -4.29            0       0.109
+ 36985.1s  fmri_noise_0.5    AUC      5       1.53            1       0.736
+ 36985.1s  fmri_noise_1.0    ACC      5      -5.00            1       0.296
+ 36985.1s  fmri_noise_1.0    AUC      5      -0.31            1       0.950
+ 36985.1s  smri_noise_0.5    ACC      5      -8.57            1       0.178
+ 36985.1s  smri_noise_0.5    AUC      5      -5.20            2       0.453
+ 36985.1s  smri_noise_1.0    ACC      5      -4.29            1       0.235
+ 36985.1s  smri_noise_1.0    AUC      5       0.31            4       0.955
+ 36985.1s  fmri_missing    ACC      5      -5.00            2       0.395
+ 36985.1s  fmri_missing    AUC      5      -5.10            1       0.170
+ 36985.1s  smri_missing    ACC      5      -7.14            1       0.189
+ 36985.1s  smri_missing    AUC      5     -13.57            1       0.073
+ 36985.1s  Reliability r, fusion weight w and kept dims k (of 48) by test condition
+ 36985.1s  r_s   r_f   w_s   w_f    k_s    k_f
+ 36985.1s  variant condition
+ 36985.1s  full    clean           0.32  0.30  0.99  0.93  47.77  45.63
+ 36985.1s  fmri_missing    0.32  0.00  1.00  0.00  48.00  12.00
+ 36985.1s  fmri_noise_0.5  0.32  0.31  0.99  0.94  47.58  45.92
+ 36985.1s  fmri_noise_1.0  0.32  0.32  0.97  0.95  47.01  46.34
+ 36985.1s  smri_missing    0.00  0.30  0.00  1.00  12.00  48.00
+ 36985.1s  smri_noise_0.5  0.32  0.30  0.99  0.94  47.77  45.69
+ 36985.1s  smri_noise_1.0  0.32  0.30  0.99  0.93  47.76  45.64
+ 36986.3s  wrote ['all_results.csv', 'paired_full_vs_baseline.csv', 'reliability_by_condition.csv', 'robustness_ACC.csv', 'robustness_AUC.csv'] and robustness_acc.png
